@@ -36,13 +36,13 @@ func main() {
 // start launchs a loop to read requests and write responses.
 func start(in io.Reader, out io.Writer) error {
 	var handle codec.MsgpackHandle
-	mpDec := codec.NewDecoder(in, &handle)
-	mpEnc := codec.NewEncoder(out, &handle)
+	dec := codec.NewDecoder(in, &handle)
+	enc := codec.NewEncoder(out, &handle)
 	req := &msg.Request{}
 	var res *msg.Response
 
 	for {
-		if err := mpDec.Decode(req); err != nil {
+		if err := dec.Decode(req); err != nil {
 			if err == io.EOF {
 				break
 			}
@@ -55,12 +55,12 @@ func start(in io.Reader, out io.Writer) error {
 				Driver:          driverVersion,
 			}
 
-			mpEnc.MustEncode(res)
+			enc.MustEncode(res)
 			return err
 		}
 
 		res = getResponse(req)
-		mpEnc.MustEncode(res)
+		enc.MustEncode(res)
 	}
 
 	return nil
