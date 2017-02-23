@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os"
@@ -8,7 +9,6 @@ import (
 	"github.com/src-d/lang-parsers/go/go-driver/msg"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/ugorji/go/codec"
 )
 
 type options struct {
@@ -38,12 +38,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var handle codec.MsgpackHandle
-	mpEnc := codec.NewEncoder(os.Stdout, &handle)
-	mpEnc.MustEncode(&msg.Request{
+	req := &msg.Request{
 		Action:          msg.ParseAst,
 		Language:        opt.Language,
 		LanguageVersion: opt.LanguageVersion,
 		Content:         string(source),
-	})
+	}
+
+	enc := json.NewEncoder(os.Stdout)
+	if err := enc.Encode(req); err != nil {
+		log.Fatal(err)
+	}
 }

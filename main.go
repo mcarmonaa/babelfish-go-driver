@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/scanner"
@@ -11,8 +13,6 @@ import (
 	"runtime"
 
 	"github.com/src-d/babelfish-go-driver/msg"
-
-	"github.com/ugorji/go/codec"
 )
 
 const (
@@ -35,9 +35,8 @@ func main() {
 
 // start launchs a loop to read requests and write responses.
 func start(in io.Reader, out io.Writer) error {
-	var handle codec.MsgpackHandle
-	dec := codec.NewDecoder(in, &handle)
-	enc := codec.NewEncoder(out, &handle)
+	dec := json.NewDecoder(in)
+	enc := json.NewEncoder(out)
 	req := &msg.Request{}
 	var res *msg.Response
 
@@ -55,12 +54,17 @@ func start(in io.Reader, out io.Writer) error {
 				Driver:          driverVersion,
 			}
 
-			enc.MustEncode(res)
+			if encErr := enc.Encode(res); encErr != nil {
+				return fmt.Errorf("%v: %v", err, encErr)
+			}
+
 			return err
 		}
 
 		res = getResponse(req)
-		enc.MustEncode(res)
+		if err := enc.Encode(res); err != nil {
+			return err
+		}
 	}
 
 	return nil
