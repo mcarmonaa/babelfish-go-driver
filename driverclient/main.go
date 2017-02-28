@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/src-d/lang-parsers/go/go-driver/msg"
+	"github.com/src-d/babelfish-go-driver/msg"
 
 	"github.com/jessevdk/go-flags"
 )
